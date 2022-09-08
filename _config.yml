@@ -11,7 +11,7 @@
 carpentry: "swc"
 
 # Overall title for pages.
-title: "Introduction to Flask for Python"
+title: "Introduction to Pyhton Dash"
 
 # Life cycle stage of the lesson
 # See this page for more details: https://cdh.carpentries.org/the-lesson-life-cycle.html
@@ -102,5 +102,5 @@ highlighter: rouge
 
 episode_order:
       - 01-intro
-      - 02-template
-      - 03-login
+      - 02-layoutplot
+      

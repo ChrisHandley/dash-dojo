@@ -1,207 +1,106 @@
 ---
-title: Python Flask Fundamentals
+title: Python Dash Fundamentals
 teaching: 10
 exercises: 10
 questions:
-- "What is Flask?"
-- "How can I create a simple Flask app?"
-- "How do I prepare it for extension?"
+  - "What is Dash?"
+  - "How can I create a simple Dash app?"
+  - "How do I prepare it for extension?"
 objectives:
-- "Build your first Flask app"
+  - "Build your first Dash app"
 keypoints:
-- "Flask is a microframework running in Python."
-- "Django is similar but not minimal."
-- "Chalice is the AWS equivalent that supports AWS specifics."
+  - "Dash is a framework running in Python built on Flask."
+  - "It exploits the power of Plotly for visually appealing and interactive plots."
 ---
 
-## Flask - What is it
+## Dash - What is it?
 
-Flask is a means to create endpoints and webapps. It is a microframework.
+Dash is an open source framework for data visualization interfaces and has been developed since 2017.
 
-It does not force you towards certain methods e.g. databases.
+It has implementations for R and Julia, and is popular with data scientists and engineering as it off loads the need to learn
+how to build web apps from the ground up.
 
-Flask is used by Pintrest and LinkedIn.
+Dash is build on three core technologies;
 
-A lot can be done with just Flask. But further libraries will extend what you can do- while Django is similar in aims but comes with a lot more assest making such apps bigger, and forces your hand on certain options.
+1. Python
+2. React.js
+3. Plotly.js
 
-Included in Flask are the components:
+Dash does the heavy lifting for us, so we can focus on the data and how we want to analyze it.
 
-- Werkzeug - a WGSI toolkit
-- Jinja a template engine
-- MarkupSafe -  a string handling library
-- ItsDangerous - a data serialization library. Used to store the session of the Flask app in a cookie in a safe way.
+Dash is used in enterprise and science.
 
-## Hello World
-~~~
-from flask import Flask
-app = Flask(__name__)
+- A dashboard to analyze trading positions in real-time
+- A visualization of millions of Uber rides
+- An interactive financial report
 
-@app.route("/")
-def hello() -> str:
-    return "Hello World"
+## Let's Build!
+
+First we need to set up a directory to work in and our environment using virtualenv.
+
+```
+mkdir dash-dojo
+virtualenv --python=python3 .env
+source .env/bin/activate
+```
+
+{: .language-bash}
+
+With the environment ready we can install the libraries that we need.
+
+```
+pip install dash numpy plotly pandas
+```
+
+{: .language-bash}
+
+We are also going to prepare our app so it will be ready for deploymnet on AWS Elastic Beanstalk
+
+In our directory let's make a source directory and within that create two files. The first is `__init__.py` which informs the environment that this is a
+directory with python files to source as modules.
+
+Now unlike previous past Dojos where we make our main python file `app.py`, for use with AEB we name it `application.py`.
+
+In application.py we can make our very simply Dash app.
+
+```
+from dash import Dash, html, dcc
+import pandas
+import plotly.express as px
+
+app = Dash(__name__)
+
+application = app.server
+
+app.title = 'Dash Dojo'
+
+app.layout = html.Div(
+    children=[
+        html.H1(children="Avocado Analytics",)
+    ]
+)
 
 
-if __name__ == "__main__":
-    app.run(debug=False)
-~~~
+if __name__ == '__main__':
+    application.run(debug=True, port=8080)
+```
+
 {: .language-python}
 
+Let's break down what is going on here.
 
-What does the above mean?
+- `Dash` initialises an instance of the application.
+- `dcc` aka dash core components, enables interactive componentsfor our graphs, dropdowns sliders.
+- `html` aka dash html components, allows access to the html tags.
+- `pandas` is for the manipulation of data.
+- `plotly.express` is our quick presets for plots
 
-First we import from the `flask` library the `Flask` class.
+Before we make a plot, we are just going to in effect generate a basic webpage.
 
-Then to the app variable we associate an instance of Flask. __name__ is the current name of the module we are building within.
+The title will appear in the tab title of our browser.
 
-@app.route() is a decorator. This will associate to an URL serviced by the app some code, in our case the function hello().
+`app.layout` is where all the business happens with defining the layout of the webapp.
 
-In this case the function is defined with '->'. This is an annotation. In this case a string class. So we can use this to find out what a function is taking as inputs and returning.
-
-The line checking is __name__ is identical to "__main__" is checking the variable is the same as __main__. So if this were a module being imported that would not be the case. In our example it is so app.run(debug=false) is run. This starts the app.
-
-To run the Flask app we can either;
-
-~~~
-$ python3 microblog.py
-~~~
-{: .terminal}
-
-or
-
-~~~
-$ export FLASK_APP=microblog.py
-$ flask run
-~~~
-{: .terminal}
-
-The latter is performed in the directory and is looking for microblog.py. Flask can be run with other keywords other than run.
-
-Doing so produces in the terminal the following
-
-~~~
-(flask-vue) chandley@LTW017:~/hello-world-flask$ flask run
- * Environment: production
-   WARNING: This is a development server. Do not use it in a production deployment.
-   Use a production WSGI server instead.
- * Debug mode: off
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-~~~
-{: .output}
-
-We could add more routes to the app.
-
-~~~
-from flask import Flask, request
-app = Flask(__name__)
-
-@app.route("/")
-def hello() -> str:
-    return "Hello World"
-
-@app.route("/test", methods=['POST'])
-def respond():
-    content = request.json
-    body = {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "input": content
-    }
-
-    response = {
-        "statusCode": 200,
-        "body": content['value']
-    }
-
-    return response
-
-if __name__ == "__main__":
-    app.run(debug=False)
-~~~
-{: .language-python}
-
-Using Postman we can send the json file payload to our endpoint http://127.0.0.1:5000/test, and the response is the
-`value` in content in the response.
-
-~~~
-{
-    "body": "what",
-    "statusCode": 200
-}
-~~~
-{: .output}
-
-The decorator to our `respond` function has the methods attribute of POST. This informs the endpoint it can receive a payload.
-
-Request takes the payload, a json, and only a json, and processes it to content where is is held as a dictionary.
-
-> ## Better File Structure?
->
-> How do we improve the file structure?
-> Can we improve the way we import our routes?
->
-> > ## Solution 
-> > ~~~
-> > microapp/
-> > ├── app
-> > │   ├── __init__.py
-> > │   └── routes.py
-> > └── microblog.py
-> > ~~~
-> > {: .terminal}
-> > 
-> > The routes are split out from the main application
-> > as it makes it much easier to then have the routes for each endpoint
-> > in their own folder
-> >
-> > ~~~
-> > from app import app
-> > 
-> > if __name__ == "__main__":
-> >     app.run(debug=False)
-> > ~~~
-> > {: .language-python}
-> >
-> > A bit confusing, but what is happening is from the app folder the app instance is being imported.
-> >
-> > ~~~
-> > from flask import Flask
-> > 
-> > app = Flask(__name__)
-> > 
-> > from app import routes
-> > ~~~
-> > {: .language-python}
-> > 
-> > The `__init__.py` file informs python the the files in the folder can be imported as modules
-> > and can be left empty. If it is not, then it is preparing other things, like our app, that can then
-> > be imported elsewhere.
-> >
-> > ~~~
-> > from app import app
-> > from flask import request
-> > 
-> > @app.route("/")
-> > def hello() -> str:
-> >     return "Hello World"
-> > 
-> > @app.route("/test", methods=['POST'])
-> > def respond():
-> >     content = request.json
-> >     body = {
-> >         "message": "Go Serverless v1.0! Your function executed successfully!",
-> >         "input": content
-> >     }
-> > 
-> >     response = {
-> >         "statusCode": 200,
-> >         "body": content['value']
-> >     }
-> >     return response
-> > ~~~
-> > {: .language-python}
-> > 
-> > Here we again import the app instance from the app folder.
-> > Then we define some of our routes. Routes could be defined elsewhere and imported in a similar manner
-> > but then you must still import app from from app for the decorator to work
-> {: .solution}
+Notice when we run the program, we use `application.run` rather than app.run as we would normally do, again a AEB nuance.
 
 {% include links.md %}
