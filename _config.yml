@@ -104,4 +104,5 @@ episode_order:
       - 01-intro
       - 02-layoutplot
       - 03-morelayout
+      - 04-interactive
       
