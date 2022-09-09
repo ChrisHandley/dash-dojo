@@ -126,7 +126,6 @@ import numpy as np
 df = pd.read_csv(
     'https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
-print(df)
 
 continent = df.continent.unique()
 continent = np.insert(continent, 0, 'All')
