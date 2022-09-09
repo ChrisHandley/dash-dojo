@@ -1,5 +1,5 @@
 ---
-title: Dash Layout and Plot
+title: More Dash Layout and Plot
 teaching: 10
 exercises: 10
 questions:
