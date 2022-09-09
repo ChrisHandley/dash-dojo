@@ -257,4 +257,105 @@ app.layout = dbc.Container(
 
 {: .language-python}
 
+## Tabs
+
+Reusable, modular, code is of course always easier to maintain. A sprawling app layout all in one file is difficult to read and maintain.
+
+Tabs is a good example of this
+
+```
+from pickletools import markobject
+from dash import Dash, html, dcc
+import pandas as pd
+import plotly.express as px
+import dash_bootstrap_components as dbc
+
+df = pd.DataFrame({
+    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
+    "Amount": [4, 1, 2, 2, 4, 5],
+    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
+})
+
+fig = px.bar(df, x="Fruit", y="Amount", color="City", barmode="group")
+
+df = pd.read_csv('https://gist.githubusercontent.com/chriddyp/c78bf172206ce24f77d6363a2d754b59/raw/c353e8ef842413cae56ae3920b8fd78468aa4cb2/usa-agricultural-exports-2011.csv')
+
+
+def generate_table(dataframe, max_rows=10):
+    return html.Table([
+        html.Thead(
+            html.Tr([html.Th(col) for col in dataframe.columns])
+        ),
+        html.Tbody([
+            html.Tr([
+                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+            ]) for i in range(min(len(dataframe), max_rows))
+        ])
+    ])
+
+
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+application = app.server
+app.config.suppress_callback_exceptions = True
+
+app.title = 'Dash Dojo'
+
+markdown_text = '''
+# Dash Markdown
+Here is some test using [CommonMark](http://commonmark.org/)
+'''
+
+tab1_content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is Tab 1!"),
+            dbc.Col(
+                dcc.Graph(
+                    id='example-graph',
+                    figure=fig
+                ), md=4),
+        ]
+    )
+)
+
+tab2_content = dbc.Card(
+    dbc.CardBody(
+        [
+            html.P("This is Tab 2!"),
+            dbc.Col([
+                html.H4(children='US Agriculture Exports (2011)'),
+                generate_table(df)
+
+            ])
+        ]
+    )
+)
+
+
+app.layout = dbc.Container(
+    [
+        html.H1(children='Fruit Analytics'),
+
+        html.Div(children='''
+        Dash: A web application framework for your data.
+    '''),
+
+        dbc.Tabs(
+            [
+                dbc.Tab(tab1_content, label="Tab 1"),
+                dbc.Tab(tab2_content, label="Tab 2")
+            ]
+        )
+
+    ], fluid=True,
+)
+
+
+if __name__ == '__main__':
+    application.run(debug=True, port=8080)
+```
+
+{: .language-python}
+
 {% include links.md %}
