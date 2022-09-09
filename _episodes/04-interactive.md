@@ -71,6 +71,7 @@ import pandas as pd
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
 
+
 app = Dash(__name__)
 
 app.layout = html.Div([
@@ -110,5 +111,67 @@ if __name__ == '__main__':
 If we look at our new layout (which uses no bootstrap components), we return to `dcc.Graph` the figure object created by the callback function.
 
 Our input to that callback is `dcc.Slider`, with passes the value of the slider.
+
+## Multiple Inputs
+
+Building on our example above we can generate a list of continents for use in the dropdown, and use the dropdown as a means to filter the data of the dataframe that is used to form the plot
+
+```
+from dash import Dash, dcc, html, Input, Output
+import plotly.express as px
+
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv(
+    'https://raw.githubusercontent.com/plotly/datasets/master/gapminderDataFiveYear.csv')
+
+print(df)
+
+continent = df.continent.unique()
+continent = np.insert(continent, 0, 'All')
+
+
+app = Dash(__name__)
+
+app.layout = html.Div([
+    dcc.Graph(id='graph-with-slider'),
+    dcc.Slider(
+        df['year'].min(),
+        df['year'].max(),
+        step=None,
+        value=df['year'].min(),
+        marks={str(year): str(year) for year in df['year'].unique()},
+        id='year-slider'
+    ),
+    dcc.Dropdown(continent, id='continent_choice', value='All')
+])
+
+
+@app.callback(
+    Output('graph-with-slider', 'figure'),
+    Input('year-slider', 'value'),
+    Input('continent_choice', 'value'))
+def update_figure(selected_year, continent_choice):
+    filtered_df = df[df.year == selected_year]
+    if continent_choice == 'All':
+        filtered_df2 = filtered_df
+    else:
+        filtered_df2 = filtered_df[filtered_df.continent == continent_choice]
+
+    fig = px.scatter(filtered_df2, x="gdpPercap", y="lifeExp",
+                     size="pop", color="continent", hover_name="country",
+                     log_x=True, size_max=55)
+
+    fig.update_layout(transition_duration=500)
+
+    return fig
+
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+```
+
+{: .language-python}
 
 {% include links.md %}
